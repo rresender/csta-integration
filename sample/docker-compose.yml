@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  redis:
+    image: redis
+    ports:
+      - '6379'
+
+  consumer:
+    build:
+       context: ./
+       dockerfile: ./cticonsumer/Dockerfile
+    image: rresender/cticonsumer
+    links: 
+      - redis
+    environment:
+      - RABBITMQ_PORT_5672_TCP_ADDR=192.168.25.9
+      - MONITORED_EXTENSIONS=65067:VDN,49167:SKILL,65068:VDN,49115:SKILL
+
+  web:
+    build: 
+      context: ./
+      dockerfile: ./ws//Dockerfile
+    image: rresender/ws
+    ports:
+      - "7070"
+    links:
+      - redis
+
+  lb:
+    image: dockercloud/haproxy
+    ports:
+      - 80:80
+    links:
+      - web
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+      

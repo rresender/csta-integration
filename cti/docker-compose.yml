@@ -1,0 +1,42 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '5672:5672'
+      - '8080:15672'
+
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'
+
+  cti-integration1:
+    build: .
+    image: rresender/cti-integration
+    ports:
+      - "7700:7700"
+    links:
+      - redis
+      - rabbitmq
+    environment:
+      - PROVIDER_HOST=127.0.0.1:4721
+      - PBX_HOST=135.122.41.48
+      - CTI_USER=ctiuser
+      - CTI_PASSWORD=Ctiuser1!
+      - MONITORED_EXTENSIONS=65067:VDN,49167:SKILL
+
+  cti-integration2:
+    build: .
+    image: rresender/cti-integration
+    ports:
+      - "7701:7700"
+    links:
+      - redis
+      - rabbitmq
+    environment:
+      - PROVIDER_HOST=127.0.0.1:4000
+      - PBX_HOST=127.0.0.1
+      - CTI_USER=ctiuser
+      - CTI_PASSWORD=Ctiuser1!
+      - MONITORED_EXTENSIONS=65068:VDN,49115:SKILL
